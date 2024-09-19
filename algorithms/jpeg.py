@@ -58,8 +58,8 @@ def convert_dicom_to_jpeg(input_dir):
     # Calcula estatísticas
     mean_original_size = np.mean(original_sizes)
     mean_converted_size = np.mean(converted_sizes)
-    compression_ratios = 1 - [o / c for o, c in zip(original_sizes, converted_sizes)]
-    mean_compression_ratio = np.mean(compression_ratios)
+    compression_ratios = [o / c for o, c in zip(original_sizes, converted_sizes)]
+    mean_compression_ratio = 1 - np.mean(compression_ratios)
     std_dev_compression_ratio = np.std(compression_ratios)
 
     # Exibe os resultados

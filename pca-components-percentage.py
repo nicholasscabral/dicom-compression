@@ -112,7 +112,7 @@ if __name__ == "__main__":
         sys.exit(1)
 
     dicom_path = sys.argv[1]
-    component_percentage = float(sys.argv[2])  # Percentual de componentes principais
-    compressed_path = sys.argv[3]
+    component_percentage = float(sys.argv[3])  # Percentual de componentes principais
+    compressed_path = sys.argv[2]
 
     process_dicom_image(dicom_path, component_percentage, compressed_path)

@@ -80,12 +80,12 @@ if __name__ == "__main__":
         "input_path", type=str, help="Caminho para a imagem DICOM de entrada"
     )
     parser.add_argument(
+        "output_path", type=str, help="Caminho para salvar a imagem comprimida"
+    )
+    parser.add_argument(
         "variance_ratio",
         type=float,
         help="Quantidade de variância a ser mantida (entre 0 e 1)",
-    )
-    parser.add_argument(
-        "output_path", type=str, help="Caminho para salvar a imagem comprimida"
     )
 
     args = parser.parse_args()

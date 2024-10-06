@@ -38,6 +38,7 @@ def convert_dicom_to_pca(input_dir, variance_ratio):
     # Listas para armazenar tamanhos dos arquivos
     original_sizes = []
     converted_sizes = []
+    compression_rates = []
 
     # Percorre todos os arquivos no diretório de entrada
     for subdir, _, files in os.walk(input_dir):
@@ -71,17 +72,17 @@ def convert_dicom_to_pca(input_dir, variance_ratio):
                     # Armazena os tamanhos dos arquivos
                     original_size = os.path.getsize(dicom_path)  # bytes
                     converted_size = os.path.getsize(npz_path)  # bytes
+                    compression_rate = (1 - converted_size / original_size) * 100
 
                     # print(
                     #     f"Tamanho original: {original_size} bytes, Comprimido: {converted_size} bytes"
                     # )
 
-                    print(
-                        f"{subdir.split('/')[-1]}/{file} => {(1 - converted_size / original_size) * 100:.2f}%"
-                    )
+                    # print(f"{subdir.split('/')[-1]}/{file} => {compression_rate:.2f}%")
 
                     original_sizes.append(original_size)
                     converted_sizes.append(converted_size)
+                    compression_rates.append(compression_rate)
 
                 except Exception as e:
                     print(f"Erro ao converter {dicom_path}: {e}")
@@ -89,16 +90,23 @@ def convert_dicom_to_pca(input_dir, variance_ratio):
     # Calcula estatísticas
     mean_original_size = np.mean(original_sizes)
     mean_converted_size = np.mean(converted_sizes)
-    compression_ratios = [o / c for o, c in zip(original_sizes, converted_sizes)]
-    mean_compression_ratio = 1 - np.mean(compression_ratios)
-    std_dev_compression_ratio = np.std(compression_ratios)
+    mean_compression_rate = 1 - np.mean(compression_rates)
+    std_dev_compression_rate = np.std(compression_rates)
 
     # Exibe os resultados
-    print(f"\nTotal de arquivos convertidos: {len(original_sizes)}")
-    print(f"Tamanho médio do arquivo original: {mean_original_size / 1024:.2f} KB")
-    print(f"Tamanho médio do arquivo comprimido: {mean_converted_size / 1024:.2f} KB")
-    print(f"Taxa de compressão média: {mean_compression_ratio * 100:.2f}%")
-    print(f"Desvio padrão da taxa de compressão: {std_dev_compression_ratio:.2f}")
+    summary = (
+        f"\nTotal de arquivos convertidos: {len(original_sizes)}\n"
+        f"Tamanho médio do arquivo original: {mean_original_size / 1024:.2f} KB\n"
+        f"Tamanho médio do arquivo comprimido: {mean_converted_size / 1024:.2f} KB\n"
+        f"Taxa de compressão média: {mean_compression_rate:.2f}%\n"
+        f"Desvio padrão da taxa de compressão: {std_dev_compression_rate:.2f}"
+    )
+    print(summary)
+
+    # Salva os resultados em um arquivo txt
+    output_txt_path = f"{input_dir}-pca-compressed-{int(variance_ratio * 1000)}.txt"
+    with open(output_txt_path, "w") as txt_file:
+        txt_file.write(summary)
 
 
 # Exemplo de uso

@@ -13,6 +13,7 @@ def convert_dicom_to_jpeg(input_dir):
     # Listas para armazenar tamanhos dos arquivos
     original_sizes = []
     converted_sizes = []
+    compression_rates = []
 
     # Percorre todos os arquivos no diretório de entrada
     for subdir, _, files in os.walk(input_dir):
@@ -46,11 +47,11 @@ def convert_dicom_to_jpeg(input_dir):
                     # Armazena os tamanhos dos arquivos
                     original_size = os.path.getsize(dicom_path) * 1000  # KB
                     converted_size = os.path.getsize(jpeg_path) * 1000  # KB
+                    compression_rate = (1 - converted_size / original_size) * 100
 
                     original_sizes.append(original_size)
                     converted_sizes.append(converted_size)
-
-                    # print(f"Convertido: {dicom_path} -> {jpeg_path}")
+                    compression_rates.append(compression_rate)
 
                 except Exception as e:
                     print(f"Erro ao converter {dicom_path}: {e}")
@@ -58,9 +59,8 @@ def convert_dicom_to_jpeg(input_dir):
     # Calcula estatísticas
     mean_original_size = np.mean(original_sizes)
     mean_converted_size = np.mean(converted_sizes)
-    compression_ratios = [o / c for o, c in zip(original_sizes, converted_sizes)]
-    mean_compression_ratio = 1 - np.mean(compression_ratios)
-    std_dev_compression_ratio = np.std(compression_ratios)
+    mean_compression_rate = np.mean(compression_rates)
+    std_dev_compression_rate = np.std(compression_rates)
 
     # Exibe os resultados
     print(f"\nTotal de arquivos convertidos: {len(original_sizes)}")
@@ -68,8 +68,8 @@ def convert_dicom_to_jpeg(input_dir):
     print(
         f"Tamanho médio do arquivo convertido: {mean_converted_size / (1024**2):.2f} Kb"
     )
-    print(f"Taxa de compressão média: {mean_compression_ratio:.2f}%")
-    print(f"Desvio padrão da taxa de compressão: {std_dev_compression_ratio:.2f}")
+    print(f"Taxa de compressão média: {mean_compression_rate:.2f}%")
+    print(f"Desvio padrão da taxa de compressão: {std_dev_compression_rate:.2f}")
 
 
 # Exemplo de uso

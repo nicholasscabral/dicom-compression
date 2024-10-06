@@ -63,13 +63,19 @@ def convert_dicom_to_jpeg(input_dir):
     std_dev_compression_rate = np.std(compression_rates)
 
     # Exibe os resultados
-    print(f"\nTotal de arquivos convertidos: {len(original_sizes)}")
-    print(f"Tamanho médio do arquivo original: {mean_original_size / (1024**2):.2f} Kb")
-    print(
-        f"Tamanho médio do arquivo convertido: {mean_converted_size / (1024**2):.2f} Kb"
+    summary = (
+        f"\nTotal de arquivos convertidos: {len(original_sizes)}\n"
+        f"Tamanho médio do arquivo original: {mean_original_size / 1024:.2f} KB\n"
+        f"Tamanho médio do arquivo comprimido: {mean_converted_size / 1024:.2f} KB\n"
+        f"Taxa de compressão média: {mean_compression_rate:.2f}%\n"
+        f"Desvio padrão da taxa de compressão: {std_dev_compression_rate:.2f}"
     )
-    print(f"Taxa de compressão média: {mean_compression_rate:.2f}%")
-    print(f"Desvio padrão da taxa de compressão: {std_dev_compression_rate:.2f}")
+    print(summary)
+
+    # Salva os resultados em um arquivo txt
+    output_txt_path = f"{input_dir}-jpeg-compressed.txt"
+    with open(output_txt_path, "w") as txt_file:
+        txt_file.write(summary)
 
 
 # Exemplo de uso

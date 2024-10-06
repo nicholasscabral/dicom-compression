@@ -90,7 +90,7 @@ def convert_dicom_to_pca(input_dir, variance_ratio):
     # Calcula estatísticas
     mean_original_size = np.mean(original_sizes)
     mean_converted_size = np.mean(converted_sizes)
-    mean_compression_rate = 1 - np.mean(compression_rates)
+    mean_compression_rate = np.mean(compression_rates)
     std_dev_compression_rate = np.std(compression_rates)
 
     # Exibe os resultados

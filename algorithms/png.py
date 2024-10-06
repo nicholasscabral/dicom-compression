@@ -2,6 +2,7 @@ import os
 import pydicom
 from PIL import Image
 import numpy as np
+from write_result_csv import update_compression_csv
 
 
 def convert_dicom_to_png(input_dir):
@@ -53,7 +54,13 @@ def convert_dicom_to_png(input_dir):
                     converted_sizes.append(converted_size)
                     compression_rates.append(compression_rate)
 
-                    # print(f"Convertido: {dicom_path} -> {png_path}")
+                    update_compression_csv(
+                        f"{subdir.split('/')[-1]}/{file}",
+                        "PNG",
+                        f"{compression_rate:.2f}",
+                        original_size,
+                        converted_size,
+                    )
 
                 except Exception as e:
                     print(f"Erro ao converter {dicom_path}: {e}")

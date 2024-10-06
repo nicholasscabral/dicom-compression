@@ -4,6 +4,7 @@ import pydicom
 from sklearn.decomposition import PCA
 import argparse
 from PIL import Image
+from write_result_csv import update_compression_csv
 
 
 # Função para carregar uma imagem DICOM e convertê-la em um array numpy
@@ -70,19 +71,21 @@ def convert_dicom_to_pca(input_dir, variance_ratio):
                     )
 
                     # Armazena os tamanhos dos arquivos
-                    original_size = os.path.getsize(dicom_path)  # bytes
-                    converted_size = os.path.getsize(npz_path)  # bytes
+                    original_size = os.path.getsize(dicom_path) * 1000  # bytes
+                    converted_size = os.path.getsize(npz_path) * 1000  # bytes
                     compression_rate = (1 - converted_size / original_size) * 100
-
-                    # print(
-                    #     f"Tamanho original: {original_size} bytes, Comprimido: {converted_size} bytes"
-                    # )
-
-                    # print(f"{subdir.split('/')[-1]}/{file} => {compression_rate:.2f}%")
 
                     original_sizes.append(original_size)
                     converted_sizes.append(converted_size)
                     compression_rates.append(compression_rate)
+
+                    update_compression_csv(
+                        f"{subdir.split('/')[-1]}/{file}",
+                        f"PCA-{int(variance_ratio * 1000)}",
+                        f"{compression_rate:.2f}",
+                        original_size,
+                        converted_size,
+                    )
 
                 except Exception as e:
                     print(f"Erro ao converter {dicom_path}: {e}")

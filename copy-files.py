@@ -32,6 +32,8 @@ def copy_dicom_by_resolution(input_dir, resolution, max_images):
 
                     # Verifica se a imagem possui dados de pixels
                     if hasattr(dicom_image, "pixel_array"):
+                        if dicom_image.SamplesPerPixel != 1:
+                            continue
                         # Obtém a resolução da imagem DICOM
                         pixel_array = dicom_image.pixel_array
                         rows, columns = pixel_array.shape[-2], pixel_array.shape[-1]

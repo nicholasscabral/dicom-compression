@@ -30,22 +30,28 @@ def copy_dicom_by_resolution(input_dir, resolution, max_images):
                     # Carrega a imagem DICOM
                     dicom_image = pydicom.dcmread(file_path)
 
-                    # Obtém a resolução da imagem DICOM
-                    rows = dicom_image.Rows
-                    columns = dicom_image.Columns
-                    dicom_resolution = f"{columns}x{rows}"
+                    # Verifica se a imagem possui dados de pixels
+                    if hasattr(dicom_image, "pixel_array"):
+                        # Obtém a resolução da imagem DICOM
+                        pixel_array = dicom_image.pixel_array
+                        rows, columns = pixel_array.shape[-2], pixel_array.shape[-1]
+                        dicom_resolution = f"{columns}x{rows}"
 
-                    # Verifica se a resolução corresponde à desejada
-                    if dicom_resolution == resolution:
-                        # Copia o arquivo para a pasta de saída
-                        shutil.copy(file_path, output_dir)
-                        print(f"Copiado: {file_path} -> {output_dir}")
-                        copied_files += 1
+                        # Verifica se a resolução corresponde à desejada
+                        if dicom_resolution == resolution:
+                            # Copia o arquivo para a pasta de saída
+                            shutil.copy(file_path, output_dir)
+                            print(f"Copiado: {file_path} -> {output_dir}")
+                            copied_files += 1
 
-                        # Verifica se atingiu o número máximo de imagens
-                        if copied_files >= max_images:
-                            print(f"\nNúmero máximo de {max_images} imagens atingido.")
-                            return
+                            # Verifica se atingiu o número máximo de imagens
+                            if copied_files >= max_images:
+                                print(
+                                    f"\nNúmero máximo de {max_images} imagens atingido."
+                                )
+                                return
+                    else:
+                        print(f"Arquivo {file_path} não contém dados de pixel.")
 
                 except Exception as e:
                     print(f"Erro ao processar {file_path}: {e}")

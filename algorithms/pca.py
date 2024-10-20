@@ -3,28 +3,29 @@ import numpy as np
 import pydicom
 from sklearn.decomposition import PCA
 import argparse
-from PIL import Image
 from write_result_csv import update_compression_csv
+import matplotlib.pyplot as plt
 
 
 # Função para carregar uma imagem DICOM e convertê-la em um array numpy
 def load_dicom_image(file_path):
-    dicom = pydicom.dcmread(file_path)
+    dicom = pydicom.dcmread(file_path, force=True)
     image = dicom.pixel_array
     return image
 
 
 # Função para aplicar PCA para compressão da imagem
-def apply_pca_compression(image, variance_ratio):
-    # Normaliza a imagem para ter valores entre 0 e 1
-    image_normalized = image / 255.0
+def perform_pca(image, variance_ratio):
+    """Aplica PCA a uma imagem e retorna a imagem comprimida e os componentes principais."""
+    gray_image = image.astype(np.float32)
 
-    # Aplica PCA mantendo a quantidade de variância especificada
-    pca = PCA(n_components=variance_ratio, svd_solver="full")
-    compressed_image = pca.fit_transform(image_normalized)
+    # Aplica PCA mantendo uma determinada porcentagem de variância
+    pca = PCA(variance_ratio, svd_solver="full")
+    compressed_image = pca.fit_transform(gray_image)
+    principal_components = pca.components_
+    mean = pca.mean_
 
-    # Retorna a imagem comprimida e o objeto PCA para reconstrução posterior
-    return compressed_image, pca
+    return compressed_image, principal_components, mean
 
 
 # Função para converter e comprimir um diretório de imagens DICOM usando PCA
@@ -32,7 +33,7 @@ def convert_dicom_to_pca(input_dir, variance_ratio):
     """
     Converte arquivos DICOM em arquivos PCA comprimidos e salva em um diretório de saída.
     """
-    # Cria o diretório de saída com sufixo '-pca-compressed' e a variância informada
+    # Cria o diretório de saída com sufixo '-pca-compressed'
     output_dir = f"{input_dir}-pca-compressed-{int(variance_ratio * 1000)}"
     os.makedirs(output_dir, exist_ok=True)
 
@@ -55,19 +56,27 @@ def convert_dicom_to_pca(input_dir, variance_ratio):
                     if len(image.shape) != 2:
                         raise ValueError("A imagem DICOM não é grayscale.")
 
-                    # Aplica PCA com a variância informada
-                    compressed_image, pca = apply_pca_compression(image, variance_ratio)
+                    # Normaliza os valores dos pixels para o intervalo 0-255
+                    pixel_array = (image - np.min(image)) / (
+                        np.max(image) - np.min(image)
+                    )
+                    pixel_array = (pixel_array * 255).astype(np.uint8)
 
-                    # Define o nome do arquivo NPZ e TIFF
+                    # Aplica PCA com a variância informada
+                    compressed_image, principal_components, mean = perform_pca(
+                        pixel_array, variance_ratio
+                    )
+
+                    # Define o nome do arquivo NPZ
                     npz_filename = os.path.splitext(file)[0] + ".npz"
                     npz_path = os.path.join(output_dir, npz_filename)
 
                     # Salva a imagem comprimida e os componentes principais em NPZ
-                    np.savez_compressed(
+                    np.savez(
                         npz_path,
                         compressed_image=compressed_image,
-                        components=pca.components_,
-                        mean=pca.mean_,
+                        principal_components=principal_components,
+                        mean=mean,
                     )
 
                     # Armazena os tamanhos dos arquivos
@@ -78,6 +87,8 @@ def convert_dicom_to_pca(input_dir, variance_ratio):
                     original_sizes.append(original_size)
                     converted_sizes.append(converted_size)
                     compression_rates.append(compression_rate)
+
+#                    print(compression_rate)
 
                     update_compression_csv(
                         f"{subdir.split('/')[-1]}/{file}",

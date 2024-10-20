@@ -18,8 +18,8 @@ def update_compression_csv(
     found = False
 
     # Converte os tamanhos para KB com duas casas decimais
-    original_size_kb = f"{round(original_size / 1000 / 1000, 2):.2f}"
-    compressed_size_kb = f"{round(compressed_size / 1000 / 1000, 2):.2f}"
+    original_size_kb = f"{round(original_size / 1000, 2):.2f}"
+    compressed_size_kb = f"{round(compressed_size / 1000, 2):.2f}"
 
     # Converte a taxa de compressão para duas casas decimais
     compression_rate = round(float(compression_rate), 2)

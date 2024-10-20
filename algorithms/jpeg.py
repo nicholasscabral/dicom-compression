@@ -46,8 +46,8 @@ def convert_dicom_to_jpeg(input_dir):
                     image.save(jpeg_path, format="JPEG")
 
                     # Armazena os tamanhos dos arquivos
-                    original_size = os.path.getsize(dicom_path) * 1000  # KB
-                    converted_size = os.path.getsize(jpeg_path) * 1000  # KB
+                    original_size = os.path.getsize(dicom_path)  # bytes
+                    converted_size = os.path.getsize(jpeg_path)  # bytes
                     compression_rate = (1 - converted_size / original_size) * 100
 
                     original_sizes.append(original_size)

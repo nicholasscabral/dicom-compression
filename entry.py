@@ -37,25 +37,25 @@ if __name__ == "__main__":
 
     commands = [
         # PNG compression
-        # ["python3", "algorithms/png.py", path_lung],
+        ["python3", "algorithms/png.py", path_lung],
         ["python3", "algorithms/png.py", path_breast],
         ["python3", "algorithms/png.py", path_brain],
         # JPEG compression
-        # ["python3", "algorithms/jpeg.py", path_lung],
+        ["python3", "algorithms/jpeg.py", path_lung],
         ["python3", "algorithms/jpeg.py", path_breast],
         ["python3", "algorithms/jpeg.py", path_brain],
         # PCA compression - LUNG
-        # ["python3", "algorithms/pca.py", path_lung, 0.95],
-        # ["python3", "algorithms/pca.py", path_lung, 0.975],
-        # ["python3", "algorithms/pca.py", path_lung, 0.99],
+        ["python3", "algorithms/new-pca.py", path_lung, 0.95],
+        ["python3", "algorithms/new-pca.py", path_lung, 0.975],
+        ["python3", "algorithms/new-pca.py", path_lung, 0.99],
         # PCA compression - BREAST
-        # ["python3", "algorithms/pca.py", path_breast, 0.95],
-        # ["python3", "algorithms/pca.py", path_breast, 0.975],
-        # ["python3", "algorithms/pca.py", path_breast, 0.99],
+        ["python3", "algorithms/new-pca.py", path_breast, 0.95],
+        ["python3", "algorithms/new-pca.py", path_breast, 0.975],
+        ["python3", "algorithms/new-pca.py", path_breast, 0.99],
         # PCA compression - BRAIN
-        # ["python3", "algorithms/pca.py", path_brain, 0.95],
-        # ["python3", "algorithms/pca.py", path_brain, 0.975],
-        # ["python3", "algorithms/pca.py", path_brain, 0.99],
+        ["python3", "algorithms/new-pca.py", path_brain, 0.95],
+        ["python3", "algorithms/new-pca.py", path_brain, 0.975],
+        ["python3", "algorithms/new-pca.py", path_brain, 0.99],
     ]
 
     run_commands_sequentially(commands)

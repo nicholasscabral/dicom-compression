@@ -6,35 +6,47 @@ from write_result_csv import update_mse_csv  # Import the CSV update function
 
 
 def calculate_mse(original_image, compressed_image):
+    """Calcula o MSE entre duas imagens"""
     mse = np.mean((original_image - compressed_image) ** 2)
     return round(mse, 2)  # Round to two decimal places
 
 
 def normalize_image(image):
+    """Normaliza a imagem para a faixa de 0 a 255"""
     return ((image - np.min(image)) / (np.max(image) - np.min(image)) * 255).astype(
         np.uint8
     )
 
 
 def read_dicom_image(path):
+    """Lê uma imagem DICOM e a normaliza"""
     ds = pydicom.dcmread(path)
     return normalize_image(ds.pixel_array.astype(np.float32))
 
 
 def read_image(path, is_pca=False):
+    """Lê uma imagem comprimida por PCA ou um arquivo PNG/JPEG"""
     if is_pca:
         data = np.load(path)
         compressed_image = data["compressed_image"]
         principal_components = data["principal_components"]
         mean = data["mean"]
+
+        # Reconstroi a imagem usando os componentes principais
         reconstructed_image = np.dot(compressed_image, principal_components) + mean
-        return normalize_image(reconstructed_image)
+
+        # Clampeia os valores da imagem reconstruída para garantir que estejam dentro da faixa [0, 255]
+        reconstructed_image = np.clip(reconstructed_image, 0, 255).astype(np.uint8)
+
+        return reconstructed_image
     else:
         return np.array(Image.open(path).convert("L"), dtype=np.uint8)
 
 
 def process_images(original_directory, compressed_directories, compressed_extensions):
-    results = []  # Collect results here
+    """Processa as imagens originais e comprimidas, calculando o MSE para cada método"""
+    results = []
+
     for file in os.listdir(original_directory):
         if not file.endswith(".dcm"):
             continue
@@ -65,27 +77,17 @@ def process_images(original_directory, compressed_directories, compressed_extens
                 "pca99": "PCA-990",
             }
 
-            # Dentro do loop:
             if method.startswith("pca"):
                 method_name = pca_method_mapping.get(method, f"PCA-{method[3:]}")
             else:
                 method_name = method.upper()
 
-            # Call the CSV update function to add MSE
-            update_mse_csv(
-                f"{os.path.basename(original_directory)}/{file}", method_name, mse
-            )
-
-            print(
-                f"MSE for {os.path.basename(original_directory)}/{file} in method {method}: {mse}"
-            )
-
             # Collect the result
             results.append(
                 {
-                    "file": f"{os.path.basename(original_directory)}/{file}",
-                    "method": method_name,
-                    "mse": mse,
+                    "original_file_name": f"{os.path.basename(original_directory)}/{file}",
+                    "compression_method": method_name,
+                    "mse_value": mse,
                 }
             )
 
@@ -129,9 +131,5 @@ for category in original_directories:
     )
     all_results.extend(category_results)
 
-# At the end, write all results to a txt file
-with open("mse_results.txt", "w") as f:
-    for result in all_results:
-        f.write(f"File: {result['file']}\n")
-        f.write(f"MSE ({result['method']}): {result['mse']}\n")
-        f.write("-" * 50 + "\n")
+# Atualiza o CSV com os resultados
+update_mse_csv(all_results)

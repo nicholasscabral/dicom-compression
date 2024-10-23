@@ -1,6 +1,7 @@
 import csv
 import os
 import sys
+import pandas as pd
 
 
 # Função para atualizar ou adicionar uma linha no CSV com a taxa de compressão específica
@@ -79,39 +80,76 @@ def update_compression_csv(
             writer.writerow(new_row)
 
 
-def update_mse_csv(original_file_name, compression_method, mse_value):
+def update_mse_csv2(original_file_name, compression_method, mse_value):
     csv_path = "compression_data.csv"
 
     # Nome da coluna de MSE
     mse_column = f"{compression_method} - MSE"
 
-    # Lista para armazenar todas as linhas
-    rows = []
-    headers = []
+    temp_file_path = "temp_compression_data.csv"  # Arquivo temporário para a escrita
+    updated = False  # Flag para verificar se a linha foi modificada
 
-    # Abre o CSV e lê todas as linhas
-    with open(csv_path, mode="r", newline="", encoding="utf-8") as file:
-        reader = csv.DictReader(file)
+    # Abrir o CSV para leitura e escrita apenas na linha correta
+    with open(csv_path, mode="r", newline="", encoding="utf-8") as infile, open(
+        temp_file_path, mode="w", newline="", encoding="utf-8"
+    ) as outfile:
+        reader = csv.DictReader(infile)
         headers = reader.fieldnames
-        rows = list(reader)
 
-    # Adiciona a coluna de MSE se não existir
-    if mse_column not in headers:
-        headers.append(mse_column)
-        for row in rows:
-            row[mse_column] = ""
+        # Verifica se a coluna de MSE já existe, senão, adiciona
+        if mse_column not in headers:
+            headers.append(mse_column)
 
-    # Atualiza a linha correspondente
-    for row in rows:
-        if row["NOME DO ARQUIVO"] == original_file_name:
-            row[mse_column] = f"{mse_value:.2f}"
-            break
-
-    # Escreve de volta no CSV
-    with open(csv_path, mode="w", newline="", encoding="utf-8") as file:
-        writer = csv.DictWriter(file, fieldnames=headers)
+        writer = csv.DictWriter(outfile, fieldnames=headers)
         writer.writeheader()
-        writer.writerows(rows)
+
+        for row in reader:
+            # Atualiza apenas a linha correspondente
+            if row["NOME DO ARQUIVO"] == original_file_name:
+                row[mse_column] = f"{mse_value:.2f}"
+                updated = True
+
+            # Escreve a linha (atualizada ou não) no arquivo temporário
+            writer.writerow(row)
+
+    # Substitui o arquivo original pelo temporário
+    if updated:
+        os.replace(temp_file_path, csv_path)
+    else:
+        os.remove(temp_file_path)
+
+
+def update_mse_csv(mse_updates):
+    csv_path = "compression_data.csv"
+
+    # Carrega o CSV como um DataFrame do Pandas
+    df = pd.read_csv(csv_path)
+
+    # Aplica todas as atualizações em memória
+    for update in mse_updates:
+        original_file_name = update["original_file_name"]
+        compression_method = update["compression_method"]
+        mse_value = update["mse_value"]
+
+        mse_column = f"MSE {compression_method}"
+
+        # Verifica se a coluna MSE já existe, senão adiciona com valores nulos
+        if mse_column not in df.columns:
+            df[mse_column] = pd.NA
+
+        # Atualiza a célula correspondente com um valor numérico, certificando-se de que mse_value seja um float
+        try:
+            df.loc[df["NOME DO ARQUIVO"] == original_file_name, mse_column] = float(
+                mse_value
+            )
+        except ValueError:
+            print(
+                f"Error converting {mse_value} to float for {original_file_name} and method {compression_method}"
+            )
+            continue
+
+    # Escreve de volta no arquivo CSV
+    df.to_csv(csv_path, index=False, encoding="utf-8")
 
 
 # Torna a função utilizável em outros arquivos ao definir o módulo principal

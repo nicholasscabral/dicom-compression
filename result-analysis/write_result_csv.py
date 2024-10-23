@@ -79,6 +79,41 @@ def update_compression_csv(
             writer.writerow(new_row)
 
 
+def update_mse_csv(original_file_name, compression_method, mse_value):
+    csv_path = "compression_data.csv"
+
+    # Nome da coluna de MSE
+    mse_column = f"{compression_method} - MSE"
+
+    # Lista para armazenar todas as linhas
+    rows = []
+    headers = []
+
+    # Abre o CSV e lê todas as linhas
+    with open(csv_path, mode="r", newline="", encoding="utf-8") as file:
+        reader = csv.DictReader(file)
+        headers = reader.fieldnames
+        rows = list(reader)
+
+    # Adiciona a coluna de MSE se não existir
+    if mse_column not in headers:
+        headers.append(mse_column)
+        for row in rows:
+            row[mse_column] = ""
+
+    # Atualiza a linha correspondente
+    for row in rows:
+        if row["NOME DO ARQUIVO"] == original_file_name:
+            row[mse_column] = f"{mse_value:.2f}"
+            break
+
+    # Escreve de volta no CSV
+    with open(csv_path, mode="w", newline="", encoding="utf-8") as file:
+        writer = csv.DictWriter(file, fieldnames=headers)
+        writer.writeheader()
+        writer.writerows(rows)
+
+
 # Torna a função utilizável em outros arquivos ao definir o módulo principal
 if __name__ == "__main__":
     print()

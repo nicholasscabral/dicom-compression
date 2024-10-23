@@ -5,17 +5,13 @@ import sys
 def run_commands_sequentially(commands):
     for command in commands:
         try:
-            # Verifica se o último parâmetro do comando é um número e o converte para string se necessário
             if isinstance(command[-1], (int, float)):
                 command = command[:-1] + [str(command[-1])]
 
-            # Imprime o comando que será executado
             print(f"Executando: {' '.join(command)}")
 
-            # Executa o comando
             result = subprocess.run(command, check=True)
 
-            # Verifica se a execução foi bem-sucedida
             if result.returncode == 0:
                 print(f"Comando {' '.join(command)} executado com sucesso!\n")
             else:
@@ -45,17 +41,17 @@ if __name__ == "__main__":
         ["python3", "algorithms/jpeg.py", path_breast],
         ["python3", "algorithms/jpeg.py", path_brain],
         # PCA compression - LUNG
-        ["python3", "algorithms/new-pca.py", path_lung, 0.95],
-        ["python3", "algorithms/new-pca.py", path_lung, 0.975],
-        ["python3", "algorithms/new-pca.py", path_lung, 0.99],
+        ["python3", "algorithms/pca.py", path_lung, 0.95],
+        ["python3", "algorithms/pca.py", path_lung, 0.975],
+        ["python3", "algorithms/pca.py", path_lung, 0.99],
         # PCA compression - BREAST
-        ["python3", "algorithms/new-pca.py", path_breast, 0.95],
-        ["python3", "algorithms/new-pca.py", path_breast, 0.975],
-        ["python3", "algorithms/new-pca.py", path_breast, 0.99],
+        ["python3", "algorithms/pca.py", path_breast, 0.95],
+        ["python3", "algorithms/pca.py", path_breast, 0.975],
+        ["python3", "algorithms/pca.py", path_breast, 0.99],
         # PCA compression - BRAIN
-        ["python3", "algorithms/new-pca.py", path_brain, 0.95],
-        ["python3", "algorithms/new-pca.py", path_brain, 0.975],
-        ["python3", "algorithms/new-pca.py", path_brain, 0.99],
+        ["python3", "algorithms/pca.py", path_brain, 0.95],
+        ["python3", "algorithms/pca.py", path_brain, 0.975],
+        ["python3", "algorithms/pca.py", path_brain, 0.99],
     ]
 
     run_commands_sequentially(commands)

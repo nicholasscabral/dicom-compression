@@ -88,8 +88,6 @@ def convert_dicom_to_pca(input_dir, variance_ratio):
                     converted_sizes.append(converted_size)
                     compression_rates.append(compression_rate)
 
-#                    print(compression_rate)
-
                     update_compression_csv(
                         f"{subdir.split('/')[-1]}/{file}",
                         f"PCA-{int(variance_ratio * 1000)}",

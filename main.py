@@ -52,6 +52,10 @@ if __name__ == "__main__":
         ["python3", "algorithms/pca.py", path_brain, 0.95],
         ["python3", "algorithms/pca.py", path_brain, 0.975],
         ["python3", "algorithms/pca.py", path_brain, 0.99],
+        # Calculate MSE and PSNR
+        ["python3", "result-analysis/mse-psnr.py"],
+        # Plot graphs
+        ["python3", "result-analysis/plot-graphs.py"],
     ]
 
     run_commands_sequentially(commands)

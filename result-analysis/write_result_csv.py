@@ -119,32 +119,40 @@ def update_mse_csv2(original_file_name, compression_method, mse_value):
         os.remove(temp_file_path)
 
 
-def update_mse_csv(mse_updates):
+def update_mse_psnr_csv(updates):
     csv_path = "compression_data.csv"
 
     # Carrega o CSV como um DataFrame do Pandas
     df = pd.read_csv(csv_path)
 
     # Aplica todas as atualizações em memória
-    for update in mse_updates:
+    for update in updates:
         original_file_name = update["original_file_name"]
         compression_method = update["compression_method"]
         mse_value = update["mse_value"]
+        psnr_value = update.get("psnr_value")  # Obtem o PSNR
 
         mse_column = f"MSE {compression_method}"
+        psnr_column = f"PSNR {compression_method}"
 
-        # Verifica se a coluna MSE já existe, senão adiciona com valores nulos
+        # Verifica se as colunas MSE e PSNR já existem, senão as adiciona com valores nulos
         if mse_column not in df.columns:
             df[mse_column] = pd.NA
+        if psnr_column not in df.columns:
+            df[psnr_column] = pd.NA
 
-        # Atualiza a célula correspondente com um valor numérico, certificando-se de que mse_value seja um float
+        # Atualiza a célula correspondente com um valor numérico
         try:
             df.loc[df["NOME DO ARQUIVO"] == original_file_name, mse_column] = float(
                 mse_value
             )
+            if psnr_value is not None:  # Certifique-se de que o PSNR foi fornecido
+                df.loc[df["NOME DO ARQUIVO"] == original_file_name, psnr_column] = (
+                    float(psnr_value)
+                )
         except ValueError:
             print(
-                f"Error converting {mse_value} to float for {original_file_name} and method {compression_method}"
+                f"Error converting {mse_value} or {psnr_value} to float for {original_file_name} and method {compression_method}"
             )
             continue
 

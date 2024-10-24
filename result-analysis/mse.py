@@ -2,13 +2,21 @@ import os
 import numpy as np
 import pydicom
 from PIL import Image
-from write_result_csv import update_mse_csv  # Import the CSV update function
+from write_result_csv import update_mse_psnr_csv  # Import the CSV update function
 
 
 def calculate_mse(original_image, compressed_image):
     """Calcula o MSE entre duas imagens"""
     mse = np.mean((original_image - compressed_image) ** 2)
     return round(mse, 2)  # Round to two decimal places
+
+
+def calculate_psnr(mse, max_pixel=255.0):
+    """Calcula o PSNR baseado no MSE"""
+    if mse == 0:
+        return float("inf")  # Retorna infinito se não há diferença
+    psnr = 10 * np.log10((max_pixel**2) / mse)
+    return round(psnr, 2)  # Round to two decimal places
 
 
 def normalize_image(image):
@@ -44,7 +52,7 @@ def read_image(path, is_pca=False):
 
 
 def process_images(original_directory, compressed_directories, compressed_extensions):
-    """Processa as imagens originais e comprimidas, calculando o MSE para cada método"""
+    """Processa as imagens originais e comprimidas, calculando o MSE e PSNR para cada método"""
     results = []
 
     for file in os.listdir(original_directory):
@@ -68,7 +76,11 @@ def process_images(original_directory, compressed_directories, compressed_extens
                 print(f"Size mismatch for {file} in method {method}")
                 continue
 
+            # Calcula o MSE
             mse = calculate_mse(original_image, compressed_image)
+
+            # Calcula o PSNR com base no MSE
+            psnr = calculate_psnr(mse)
 
             # Build the method name
             pca_method_mapping = {
@@ -88,6 +100,7 @@ def process_images(original_directory, compressed_directories, compressed_extens
                     "original_file_name": f"{os.path.basename(original_directory)}/{file}",
                     "compression_method": method_name,
                     "mse_value": mse,
+                    "psnr_value": psnr,  # Adiciona o PSNR junto com o MSE
                 }
             )
 
@@ -131,5 +144,5 @@ for category in original_directories:
     )
     all_results.extend(category_results)
 
-# Atualiza o CSV com os resultados
-update_mse_csv(all_results)
+# Atualiza o CSV com os resultados (incluindo MSE e PSNR)
+update_mse_psnr_csv(all_results)
